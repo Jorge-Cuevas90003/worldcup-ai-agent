@@ -1,5 +1,6 @@
 import { CalendarDays } from 'lucide-react';
 import MatchCard from '../components/MatchCard';
+import LearnOverlay from '../components/LearnOverlay';
 
 const demoMatches = [
   { id: '1', home: 'Mexico', away: 'Poland', homeFlag: '🇲🇽', awayFlag: '🇵🇱', homeOdds: 42, awayOdds: 28, drawOdds: 30, group: 'Group G', venue: 'Estadio Azteca, Mexico City', synced: true },
@@ -10,11 +11,12 @@ const demoMatches = [
   { id: '6', home: 'Belgium', away: 'Morocco', homeFlag: '🇧🇪', awayFlag: '🇲🇦', homeOdds: 44, awayOdds: 24, drawOdds: 32, group: 'Group E', venue: 'BMO Stadium, Toronto', synced: false },
 ];
 
-export default function Matches({ isPro, theme, bp }) {
+export default function Matches({ isPro, theme, bp, learning }) {
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
 
   return (
     <div style={{ padding: isMobile ? '16px 14px' : '24px', maxWidth: isPro ? 900 : 640, margin: '0 auto' }}>
+      {learning && <LearnOverlay section="matches" theme={theme} />}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <div style={{
           width: 38, height: 38, borderRadius: 11,

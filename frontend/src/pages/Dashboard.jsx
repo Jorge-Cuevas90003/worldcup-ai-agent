@@ -8,7 +8,8 @@ import { SkeletonCard, SkeletonRow } from '../components/Skeleton';
 import { cardBox, headingStyle, dataFont, animEntry } from '../utils/styles';
 import AnimatedNumber from '../components/AnimatedNumber';
 import FlagIcon from '../components/FlagIcon';
-import { buildTeamAnalytics, sentimentLabel } from '../services/analytics';
+import LearnOverlay from '../components/LearnOverlay';
+import { buildTeamAnalytics, sentimentLabel, calculateEloRating, detectSmartMoney, calculateEdge } from '../services/analytics';
 import { getOddsHistory, getWatchlist, addToWatchlist, removeFromWatchlist } from '../services/supabase';
 
 const HARDCODED_USER_ID = '00000000-0000-0000-0000-000000000000';
@@ -218,7 +219,7 @@ function PortfolioSimulator({ teams, theme, isMobile }) {
   );
 }
 
-export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSource, lastUpdate }) {
+export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSource, lastUpdate, learning }) {
   const teams = propTeams || [];
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
   const realHistory = useOddsHistory();
@@ -301,6 +302,7 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
               </div>
               <CountdownBlock theme={theme} isMobile={isMobile} />
             </div>
+            {learning && <LearnOverlay section="dashboard-countdown" theme={theme} />}
 
             <div style={{ width: '100%', height: 1, background: theme.border, margin: '16px 0' }} />
 
@@ -329,6 +331,7 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
             </div>
           </div>
         </div>
+        {learning && <LearnOverlay section="dashboard-hero" theme={theme} />}
 
         {/* Watchlist */}
         <WatchlistPanel
@@ -353,6 +356,7 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
         <div style={{ marginTop: 16, animation: animEntry(theme, teams.length) }}>
           <PortfolioSimulator teams={teams} theme={theme} isMobile={isMobile} />
         </div>
+        {learning && <LearnOverlay section="portfolio-sim" theme={theme} />}
 
         <div style={{
           textAlign: 'center', marginTop: 16, padding: '14px 20px', borderRadius: theme.borderRadius,
@@ -401,6 +405,7 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
           subtitle={lastUpdate ? `Updated ${lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Polling 15s'}
           theme={theme} accent={theme.accentAlt} /></div>
       </div>
+      {learning && <LearnOverlay section="dashboard-stats" theme={theme} />}
 
       {/* Market Intelligence Panel */}
       <div style={{ ...gc, marginBottom: 16, padding: '16px 18px' }}>
@@ -411,45 +416,62 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
           gap: 8,
         }}>
           {teams.slice(0, isMobile ? 4 : 8).map((t) => {
-            const analytics = buildTeamAnalytics(t, []);
+            const analytics = buildTeamAnalytics(t, [], teams);
             const sInfo = sentimentLabel(analytics.sentiment);
+            const edge = calculateEdge(t);
+            const smartMoney = detectSmartMoney(t, []);
+            const elo = calculateEloRating(t, teams);
             return (
               <div key={t.team} className="card-hover" style={{
                 padding: '10px 12px', borderRadius: Math.min(theme.borderRadius, 10),
                 background: theme.card2, border: `1px solid ${theme.border}`,
                 transition: 'all 0.2s',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
                   <FlagIcon team={t.team} size={16} />
                   <span style={{ fontSize: 11, fontWeight: 700, fontFamily: theme.fontHeading, color: theme.text }}>
                     {t.team.length > 8 ? t.team.substring(0, 7) + '.' : t.team}
+                  </span>
+                  <span style={{ marginLeft: 'auto', fontSize: 8, fontFamily: theme.fontData, color: theme.textMuted }}>
+                    ELO {elo}
                   </span>
                 </div>
                 <div style={{ fontSize: 18, fontWeight: 800, fontFamily: theme.fontHeading, color: theme.accent, lineHeight: 1 }}>
                   {t.odds?.toFixed(2)}%
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 4, flexWrap: 'wrap' }}>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, fontFamily: theme.fontData,
-                    padding: '1px 5px', borderRadius: Math.min(theme.borderRadius, 4),
+                    fontSize: 8, fontWeight: 700, fontFamily: theme.fontData,
+                    padding: '1px 4px', borderRadius: Math.min(theme.borderRadius, 4),
                     background: (t.change || 0) >= 0 ? theme.greenDim : theme.redDim,
                     color: (t.change || 0) >= 0 ? theme.green : theme.red,
                   }}>
                     {(t.change || 0) >= 0 ? '+' : ''}{(t.change || 0).toFixed(2)}%
                   </span>
                   <span style={{
-                    fontSize: 8, fontWeight: 700, fontFamily: theme.fontData,
+                    fontSize: 7, fontWeight: 700, fontFamily: theme.fontData,
                     padding: '1px 4px', borderRadius: Math.min(theme.borderRadius, 4),
                     background: `${sInfo.color}20`, color: sInfo.color,
                   }}>
                     {sInfo.label}
                   </span>
+                  {edge.label !== 'NO DATA' && (
+                    <span style={{
+                      fontSize: 7, fontWeight: 700, fontFamily: theme.fontData,
+                      padding: '1px 4px', borderRadius: Math.min(theme.borderRadius, 4),
+                      background: edge.label === 'UNDERVALUED' ? theme.greenDim : edge.label === 'OVERVALUED' ? theme.redDim : `${theme.textMuted}20`,
+                      color: edge.label === 'UNDERVALUED' ? theme.green : edge.label === 'OVERVALUED' ? theme.red : theme.textMuted,
+                    }}>
+                      {edge.label} {edge.edge > 0 ? '+' : ''}{edge.edge.toFixed(1)}%
+                    </span>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+      {learning && <LearnOverlay section="market-intelligence" theme={theme} />}
 
       {/* Bento grid */}
       <div style={{
@@ -508,11 +530,13 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
           </ResponsiveContainer>
         </div>
       </div>
+      {learning && <LearnOverlay section="odds-trend" theme={theme} />}
 
       {/* Portfolio simulator (Pro) */}
       <div style={{ marginBottom: 16 }}>
         <PortfolioSimulator teams={teams} theme={theme} isMobile={isMobile} />
       </div>
+      {learning && <LearnOverlay section="portfolio-sim" theme={theme} />}
 
       {/* Full table */}
       <div style={{ ...gc, padding: 0, overflow: 'auto' }}>

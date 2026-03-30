@@ -33,7 +33,7 @@ const fallbackTeams = [
 
 export default function App() {
   const { themeKey, theme, setTheme } = useTheme();
-  const { mode, toggleMode, isPro } = useMode();
+  const { mode, toggleMode, isPro, learning, toggleLearning } = useMode();
   const bp = useBreakpoint();
   const [teams, setTeams] = useState(fallbackTeams);
   const [dataSource, setDataSource] = useState('loading');
@@ -132,18 +132,20 @@ export default function App() {
               mode={mode} toggleMode={toggleMode} isPro={isPro}
               bp={bp} teams={teams} dataSource={dataSource}
               lastUpdate={lastUpdate}
+              learning={learning} toggleLearning={toggleLearning}
             />
           }>
             <Route index element={
               <Dashboard isPro={isPro} theme={theme} bp={bp}
-                teams={teams} dataSource={dataSource} lastUpdate={lastUpdate} />
+                teams={teams} dataSource={dataSource} lastUpdate={lastUpdate}
+                learning={learning} />
             } />
             <Route path="alerts" element={
-              <Alerts isPro={isPro} theme={theme} bp={bp} liveAlerts={alerts} />
+              <Alerts isPro={isPro} theme={theme} bp={bp} liveAlerts={alerts} learning={learning} />
             } />
-            <Route path="matches" element={<Matches isPro={isPro} theme={theme} bp={bp} />} />
+            <Route path="matches" element={<Matches isPro={isPro} theme={theme} bp={bp} learning={learning} />} />
             <Route path="analysis" element={<Analysis theme={theme} bp={bp} teams={teams} />} />
-            <Route path="connections" element={<Connections isPro={isPro} theme={theme} bp={bp} />} />
+            <Route path="connections" element={<Connections isPro={isPro} theme={theme} bp={bp} learning={learning} />} />
             <Route path="callback" element={<Callback theme={theme} />} />
           </Route>
         </Routes>

@@ -32,25 +32,13 @@
         navigator.serviceWorker.register('/sw.js').catch(() => {});
       }
       // PWA install prompt — shows a small "Install" button in the page footer
+      // PWA install prompt stored silently — no floating button
       let deferredPrompt;
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        const btn = document.createElement('button');
-        btn.textContent = 'Install App';
-        btn.setAttribute('aria-label', 'Install WorldCup Agent as an app');
-        Object.assign(btn.style, {
-          position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: '9999', padding: '8px 16px', border: 'none', borderRadius: '20px',
-          background: 'rgba(201,169,78,0.9)', color: '#0a0e18', fontWeight: '600',
-          fontSize: '12px', cursor: 'pointer', boxShadow: '0 4px 16px rgba(0,0,0,.3)',
-          backdropFilter: 'blur(8px)', opacity: '0.85'
-        });
-        document.body.appendChild(btn);
-        btn.addEventListener('click', () => {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(() => { btn.remove(); deferredPrompt = null; });
-        });
+        // Expose to app via global so components can trigger install if needed
+        window.__pwaInstall = () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt = null; } };
       });
     </script>
   </body>

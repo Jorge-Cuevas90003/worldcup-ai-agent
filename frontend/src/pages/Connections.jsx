@@ -3,8 +3,9 @@ import { Shield, Lock, Link2, Check, X, Mail, CalendarDays, MessageSquare, Clock
 import ConnectionCard from '../components/ConnectionCard';
 import { connectService } from '../services/api';
 import { cardBox, headingStyle, dataFont, animEntry } from '../utils/styles';
+import LearnOverlay from '../components/LearnOverlay';
 
-export default function Connections({ isPro, theme, bp }) {
+export default function Connections({ isPro, theme, bp, learning }) {
   const [connections, setConnections] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('wc_connections') || '{}');
@@ -73,6 +74,8 @@ export default function Connections({ isPro, theme, bp }) {
         </div>
       </div>
 
+      {learning && <LearnOverlay section="vault" theme={theme} />}
+
       {/* Auth0 Token Vault badge — prominent */}
       <div style={{
         ...gc,
@@ -108,6 +111,8 @@ export default function Connections({ isPro, theme, bp }) {
           </div>
         </div>
       </div>
+
+      {learning && <LearnOverlay section="permissions" theme={theme} />}
 
       {/* ── Permission Dashboard ── */}
       {isPro ? (
@@ -209,6 +214,8 @@ export default function Connections({ isPro, theme, bp }) {
           />
         ))}
       </div>
+
+      {learning && <LearnOverlay section="security-log" theme={theme} />}
 
       {/* ── Security Log Timeline ── */}
       {isPro ? (() => {

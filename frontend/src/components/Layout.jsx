@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import ThemePicker from './ThemePicker';
 import ModeSwitcher from './ModeSwitcher';
 import Ticker from './Ticker';
+import LearnOverlay from './LearnOverlay';
 import { navStyle, headingStyle, textureOverlay } from '../utils/styles';
 
 const liteNav = [
@@ -40,7 +41,7 @@ function useCountdown() {
 
 export default function Layout({
   theme, themeKey, setTheme, mode, toggleMode, isPro, bp, teams,
-  dataSource, lastUpdate,
+  dataSource, lastUpdate, learning, toggleLearning,
 }) {
   const [time, setTime] = useState(new Date());
   const countdown = useCountdown();
@@ -155,7 +156,7 @@ export default function Layout({
             </div>
           )}
 
-          <ModeSwitcher mode={mode} toggleMode={toggleMode} theme={theme} isPro={isPro} />
+          <ModeSwitcher mode={mode} toggleMode={toggleMode} theme={theme} isPro={isPro} learning={learning} toggleLearning={toggleLearning} />
           <ThemePicker themeKey={themeKey} setTheme={setTheme} theme={theme} />
         </div>
 
@@ -187,6 +188,7 @@ export default function Layout({
         )}
       </header>
 
+      {learning && isPro && !isXXS && <LearnOverlay section="ticker" theme={theme} />}
       {isPro && !isXXS && <Ticker teams={teams} theme={theme} />}
 
       <main style={{ position: 'relative', zIndex: 1, paddingBottom: isMobile ? 80 : 24, minHeight: 'calc(100vh - 120px)' }}>

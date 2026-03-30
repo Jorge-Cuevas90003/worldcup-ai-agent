@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import AlertCard from '../components/AlertCard';
+import LearnOverlay from '../components/LearnOverlay';
 
 const demoAlerts = [
   { id: '1', team: 'Spain', flag: '🇪🇸', previousOdds: 14.1, currentOdds: 15.3, change: 1.2, type: 'hot', severity: 24, message: 'Spain odds surged 1.2%', detail: '14.1% → 15.3% | Vol: $48.2M', timestamp: { _seconds: Date.now() / 1000 - 600 } },
@@ -10,7 +11,7 @@ const demoAlerts = [
   { id: '5', team: 'France', flag: '🇫🇷', previousOdds: 11.2, currentOdds: 10.7, change: -0.5, type: 'drop', severity: 10, message: 'France odds dropped 0.5%', detail: '11.2% → 10.7% | Vol: $35.5M', timestamp: { _seconds: Date.now() / 1000 - 10800 } },
 ];
 
-export default function Alerts({ isPro, theme, bp, liveAlerts = [] }) {
+export default function Alerts({ isPro, theme, bp, liveAlerts = [], learning }) {
   // Merge live alerts with demo, live first
   const alerts = liveAlerts.length > 0 ? liveAlerts : demoAlerts;
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
@@ -20,6 +21,7 @@ export default function Alerts({ isPro, theme, bp, liveAlerts = [] }) {
 
   return (
     <div style={{ padding: isMobile ? '16px 14px' : '24px', maxWidth: isPro ? 900 : 640, margin: '0 auto' }}>
+      {learning && <LearnOverlay section="alerts" theme={theme} />}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div style={{
           width: 38, height: 38, borderRadius: 11,
