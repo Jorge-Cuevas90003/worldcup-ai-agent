@@ -1,0 +1,17 @@
+{
+  "name": "worldcup-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI agent that monitors World Cup 2026 odds from Polymarket and sends alerts via Auth0 Token Vault",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "deploy": "vercel --prod",
+    "install:all": "npm install && cd frontend && npm install"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  },
+  "keywords": ["worldcup", "polymarket", "auth0", "vercel", "agent"],
+  "license": "MIT"
+}
