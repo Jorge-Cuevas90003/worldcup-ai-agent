@@ -259,9 +259,12 @@ export function detectSmartMoney(team, history) {
  */
 export function calculateEdge(team) {
   const DEFAULT = { edge: 0, label: 'NO DATA', historicalRate: null };
-  if (!team || !team.name) return DEFAULT;
+  if (!team) return DEFAULT;
 
-  const key = team.name.toLowerCase().trim();
+  const teamName = (team.team || team.name || '');
+  if (!teamName) return DEFAULT;
+
+  const key = teamName.toLowerCase().trim();
   const historicalRate = HISTORICAL_WC_WIN_RATES[key];
 
   if (historicalRate == null) return DEFAULT;

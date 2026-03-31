@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Trophy, BarChart3, Users, Activity, TrendingUp, Sparkles, Zap, PieChart as PieIcon } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePie, Pie, Cell, BarChart, Bar } from 'recharts';
 import StatCard from '../components/StatCard';
@@ -252,6 +252,24 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
     }
   }
 
+  // ── Team histories for Market Intelligence analytics ──
+  const [teamHistories, setTeamHistories] = useState({});
+
+  useEffect(() => {
+    if (teams.length === 0) return;
+    const fetchHistories = async () => {
+      const histories = {};
+      for (const t of teams.slice(0, 8)) {
+        try {
+          const { data } = await getOddsHistory(t.team, 7);
+          if (data && data.length > 0) histories[t.team] = data;
+        } catch { /* ignore */ }
+      }
+      setTeamHistories(histories);
+    };
+    fetchHistories();
+  }, [teams.length]); // only refetch when team count changes
+
   const watchedTeams = teams.filter((t) => watchedTeamNames.includes(t.team));
   const oddsHistory = realHistory || demoHistory;
   const isXXS = bp === 'xxs';
@@ -416,7 +434,7 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
           gap: 8,
         }}>
           {teams.slice(0, isMobile ? 4 : 8).map((t) => {
-            const analytics = buildTeamAnalytics(t, [], teams);
+            const analytics = buildTeamAnalytics(t, teamHistories[t.team] || [], teams);
             const sInfo = sentimentLabel(analytics.sentiment);
             const edge = calculateEdge(t);
             const smartMoney = detectSmartMoney(t, []);

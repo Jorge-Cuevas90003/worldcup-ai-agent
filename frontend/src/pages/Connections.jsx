@@ -14,6 +14,13 @@ export default function Connections({ isPro, theme, bp, learning }) {
   });
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
 
+  const handleDisconnect = (service) => {
+    const stored = JSON.parse(localStorage.getItem('wc_connections') || '{}');
+    delete stored[service];
+    localStorage.setItem('wc_connections', JSON.stringify(stored));
+    setConnections(prev => ({ ...prev, [service]: false }));
+  };
+
   const handleConnect = async (service) => {
     try {
       // Try API first, fallback to direct Auth0 URL
@@ -203,15 +210,37 @@ export default function Connections({ isPro, theme, bp, learning }) {
       {/* Service cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: isPro ? 10 : 10 }}>
         {['gmail', 'calendar', 'slack'].map((s, i) => (
-          <ConnectionCard
-            key={s}
-            service={s}
-            connected={connections[s]}
-            onConnect={handleConnect}
-            isPro={isPro}
-            theme={theme}
-            index={i}
-          />
+          <div key={s}>
+            <ConnectionCard
+              service={s}
+              connected={connections[s]}
+              onConnect={handleConnect}
+              isPro={isPro}
+              theme={theme}
+              index={i}
+            />
+            {connections[s] && (
+              <button
+                onClick={() => handleDisconnect(s)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 11,
+                  color: theme.red || '#f87171',
+                  fontFamily: theme.fontData,
+                  padding: '4px 12px',
+                  marginTop: 2,
+                  opacity: 0.7,
+                  transition: 'opacity 0.2s',
+                }}
+                onMouseEnter={(e) => { e.target.style.opacity = 1; }}
+                onMouseLeave={(e) => { e.target.style.opacity = 0.7; }}
+              >
+                Disconnect {s}
+              </button>
+            )}
+          </div>
         ))}
       </div>
 
