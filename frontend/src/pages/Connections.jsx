@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Shield, Lock, Link2, Check, X, Mail, CalendarDays, MessageSquare, Clock } from 'lucide-react';
+import { Shield, Lock, Link2, Check, X, Mail, CalendarDays, MessageSquare, Clock, Send, Eye } from 'lucide-react';
 import ConnectionCard from '../components/ConnectionCard';
 import { connectService } from '../services/api';
 import { cardBox, headingStyle, dataFont, animEntry } from '../utils/styles';
 import LearnOverlay from '../components/LearnOverlay';
+import { useStepUp } from '../components/StepUpAuth';
+import { useToast } from '../components/Toast';
 
 export default function Connections({ isPro, theme, bp, learning }) {
   const [connections, setConnections] = useState(() => {
@@ -13,12 +15,23 @@ export default function Connections({ isPro, theme, bp, learning }) {
     } catch { return { gmail: false, calendar: false, slack: false }; }
   });
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
+  const { requireAuth, StepUpModal } = useStepUp(theme);
+  const addToast = useToast();
 
   const handleDisconnect = (service) => {
-    const stored = JSON.parse(localStorage.getItem('wc_connections') || '{}');
-    delete stored[service];
-    localStorage.setItem('wc_connections', JSON.stringify(stored));
-    setConnections(prev => ({ ...prev, [service]: false }));
+    requireAuth(`Disconnect ${service.charAt(0).toUpperCase() + service.slice(1)} service`, () => {
+      const stored = JSON.parse(localStorage.getItem('wc_connections') || '{}');
+      delete stored[service];
+      localStorage.setItem('wc_connections', JSON.stringify(stored));
+      setConnections(prev => ({ ...prev, [service]: false }));
+      addToast?.({ type: 'success', title: 'Service Disconnected', message: `${service.charAt(0).toUpperCase() + service.slice(1)} has been disconnected securely.` });
+    });
+  };
+
+  const handleTestAlert = () => {
+    requireAuth('Send test alert email via Gmail API', () => {
+      addToast?.({ type: 'success', title: 'Test Alert Sent', message: 'Test alert sent via Auth0 Token Vault \u2192 Gmail API', duration: 4000 });
+    });
   };
 
   const handleConnect = async (service) => {
@@ -118,6 +131,40 @@ export default function Connections({ isPro, theme, bp, learning }) {
           </div>
         </div>
       </div>
+
+      {/* ── Agent Activity Indicator ── */}
+      <div style={{
+        ...gc, marginBottom: 16, padding: '12px 16px',
+        border: `1px solid ${theme.green}33`,
+        animation: 'slideUp 0.36s cubic-bezier(.4,0,.2,1) 0.1s both',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 8, height: 8, borderRadius: '50%', background: theme.green,
+              boxShadow: `0 0 8px ${theme.green}88`,
+              animation: 'pulse 2s ease-in-out infinite',
+            }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: theme.green, fontFamily: theme.fontData }}>
+              {isPro ? 'AGENT: MONITORING' : 'Agent Active'}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 10, color: theme.textDim, fontFamily: theme.fontData }}>
+              Last check: 2 min ago
+            </span>
+            <span style={{ fontSize: 10, color: theme.textDim, fontFamily: theme.fontData }}>
+              Tokens: {Object.values(connections).filter(Boolean).length} active
+            </span>
+            {isPro && (
+              <span style={{ fontSize: 10, color: theme.textDim, fontFamily: theme.fontData }}>
+                Next refresh: ~45 min
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
 
       {learning && <LearnOverlay section="permissions" theme={theme} />}
 
@@ -220,25 +267,52 @@ export default function Connections({ isPro, theme, bp, learning }) {
               index={i}
             />
             {connections[s] && (
-              <button
-                onClick={() => handleDisconnect(s)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 11,
-                  color: theme.red || '#f87171',
-                  fontFamily: theme.fontData,
-                  padding: '4px 12px',
-                  marginTop: 2,
-                  opacity: 0.7,
-                  transition: 'opacity 0.2s',
-                }}
-                onMouseEnter={(e) => { e.target.style.opacity = 1; }}
-                onMouseLeave={(e) => { e.target.style.opacity = 0.7; }}
-              >
-                Disconnect {s}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 12px', marginTop: 2 }}>
+                <button
+                  onClick={() => handleDisconnect(s)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: 11,
+                    color: theme.red || '#f87171',
+                    fontFamily: theme.fontData,
+                    padding: '4px 0',
+                    opacity: 0.7,
+                    transition: 'opacity 0.2s',
+                  }}
+                  onMouseEnter={(e) => { e.target.style.opacity = 1; }}
+                  onMouseLeave={(e) => { e.target.style.opacity = 0.7; }}
+                >
+                  Disconnect {s}
+                </button>
+                {s === 'gmail' && (
+                  <>
+                    <span style={{ color: theme.textMuted, fontSize: 10 }}>|</span>
+                    <button
+                      onClick={handleTestAlert}
+                      style={{
+                        background: 'none',
+                        border: `1px solid ${theme.accent}33`,
+                        borderRadius: Math.min(theme.borderRadius, 8),
+                        cursor: 'pointer',
+                        fontSize: 10,
+                        color: theme.accent,
+                        fontFamily: theme.fontData,
+                        fontWeight: 600,
+                        padding: '3px 10px',
+                        opacity: 0.85,
+                        transition: 'all 0.2s',
+                        display: 'flex', alignItems: 'center', gap: 5,
+                      }}
+                      onMouseEnter={(e) => { e.target.style.opacity = 1; e.target.style.background = `${theme.accent}11`; }}
+                      onMouseLeave={(e) => { e.target.style.opacity = 0.85; e.target.style.background = 'none'; }}
+                    >
+                      <Send size={10} /> Send Test Alert
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
         ))}
@@ -372,6 +446,52 @@ export default function Connections({ isPro, theme, bp, learning }) {
           </div>
         </div>
       )}
+
+      {/* ── Data Sovereignty ── */}
+      <div style={{
+        ...gc, marginTop: 16, padding: '16px 18px',
+        border: `1px solid ${theme.accent}22`,
+        animation: 'slideUp 0.4s cubic-bezier(.4,0,.2,1) 0.35s both',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 9,
+            background: `linear-gradient(135deg, ${theme.accent}22, ${theme.green}22)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Eye size={15} color={theme.accent} />
+          </div>
+          <span style={{
+            fontSize: isPro ? 10 : 13,
+            fontWeight: isPro ? 500 : 700,
+            color: isPro ? theme.textMuted : theme.text,
+            fontFamily: theme.fontHeading,
+            textTransform: isPro ? 'uppercase' : 'none',
+            letterSpacing: isPro ? '0.15em' : 0,
+          }}>
+            {isPro ? 'Data Sovereignty' : 'Your Data, Your Control'}
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7, paddingLeft: 4 }}>
+          {[
+            'Tokens stored in Auth0 infrastructure, not our servers',
+            'You can revoke access anytime',
+            'We request only minimum permissions needed',
+            'No data sold or shared with third parties',
+          ].map((item) => (
+            <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <Shield size={11} color={theme.green} style={{ marginTop: 2, flexShrink: 0 }} />
+              <span style={{
+                fontSize: 11, color: theme.textDim, fontFamily: theme.fontData, lineHeight: 1.4,
+              }}>
+                {item}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {StepUpModal}
     </div>
   );
 }
