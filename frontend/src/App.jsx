@@ -144,7 +144,7 @@ export default function App() {
               <Alerts isPro={isPro} theme={theme} bp={bp} liveAlerts={alerts} learning={learning} />
             } />
             <Route path="matches" element={<Matches isPro={isPro} theme={theme} bp={bp} learning={learning} />} />
-            <Route path="analysis" element={<Analysis theme={theme} bp={bp} teams={teams} />} />
+            <Route path="analysis" element={<Analysis theme={theme} bp={bp} teams={teams} learning={learning} />} />
             <Route path="connections" element={<Connections isPro={isPro} theme={theme} bp={bp} learning={learning} />} />
             <Route path="callback" element={<Callback theme={theme} />} />
           </Route>

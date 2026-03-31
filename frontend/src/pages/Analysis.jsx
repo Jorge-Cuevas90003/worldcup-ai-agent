@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { cardBox, headingStyle, dataFont } from '../utils/styles';
+import LearnOverlay from '../components/LearnOverlay';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -35,7 +36,7 @@ const trendData = [
 const teamNames = Object.keys(teamStats);
 const lineColors = ['#c9a94e', '#00e676', '#3b82f6', '#ef4444', '#22d3ee', '#a855f7'];
 
-export default function Analysis({ theme, bp }) {
+export default function Analysis({ theme, bp, learning }) {
   const [teamA, setTeamA] = useState('Spain');
   const [teamB, setTeamB] = useState('England');
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
@@ -80,6 +81,8 @@ export default function Analysis({ theme, bp }) {
           ANALYSIS
         </h2>
       </div>
+
+      {learning && <LearnOverlay section="polymarket" theme={theme} />}
 
       {/* Team selector pills */}
       <div style={{

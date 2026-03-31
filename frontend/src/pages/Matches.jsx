@@ -46,8 +46,19 @@ export default function Matches({ isPro, theme, bp, learning }) {
         gridTemplateColumns: isPro && !isMobile ? '1fr 1fr' : '1fr',
         gap: isPro ? 10 : 12,
       }}>
-        {demoMatches.map((m, i) => (
+        {demoMatches.slice(0, 1).map((m, i) => (
           <MatchCard key={m.id} match={m} isPro={isPro} theme={theme} index={i} />
+        ))}
+      </div>
+      {learning && <LearnOverlay section="probability-bar" theme={theme} />}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isPro && !isMobile ? '1fr 1fr' : '1fr',
+        gap: isPro ? 10 : 12,
+        marginTop: isPro ? 10 : 12,
+      }}>
+        {demoMatches.slice(1).map((m, i) => (
+          <MatchCard key={m.id} match={m} isPro={isPro} theme={theme} index={i + 1} />
         ))}
       </div>
     </div>

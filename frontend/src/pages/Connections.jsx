@@ -216,6 +216,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
       </div>
 
       {learning && <LearnOverlay section="security-log" theme={theme} />}
+      {learning && <LearnOverlay section="token-lifecycle" theme={theme} />}
 
       {/* ── Security Log Timeline ── */}
       {isPro ? (() => {

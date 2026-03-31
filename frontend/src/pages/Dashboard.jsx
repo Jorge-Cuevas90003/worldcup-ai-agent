@@ -472,6 +472,8 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
         </div>
       </div>
       {learning && <LearnOverlay section="market-intelligence" theme={theme} />}
+      {learning && <LearnOverlay section="elo" theme={theme} />}
+      {learning && <LearnOverlay section="edge" theme={theme} />}
 
       {/* Bento grid */}
       <div style={{
@@ -537,6 +539,7 @@ export default function Dashboard({ isPro, theme, bp, teams: propTeams, dataSour
         <PortfolioSimulator teams={teams} theme={theme} isMobile={isMobile} />
       </div>
       {learning && <LearnOverlay section="portfolio-sim" theme={theme} />}
+      {learning && <LearnOverlay section="portfolio-detail" theme={theme} />}
 
       {/* Full table */}
       <div style={{ ...gc, padding: 0, overflow: 'auto' }}>

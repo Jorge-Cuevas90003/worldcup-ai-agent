@@ -12,8 +12,8 @@ const demoAlerts = [
 ];
 
 export default function Alerts({ isPro, theme, bp, liveAlerts = [], learning }) {
-  // Merge live alerts with demo, live first
-  const alerts = liveAlerts.length > 0 ? liveAlerts : demoAlerts;
+  // Show live alerts first, then fill with demo alerts to always have content
+  const alerts = [...liveAlerts, ...demoAlerts].slice(0, Math.max(liveAlerts.length, 5));
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
   const surges = alerts.filter((a) => a.type === 'hot').length;
   const drops = alerts.filter((a) => a.type === 'drop').length;
@@ -85,6 +85,7 @@ export default function Alerts({ isPro, theme, bp, liveAlerts = [], learning }) 
           <AlertCard key={a.id} alert={a} isPro={isPro} theme={theme} index={i} />
         ))}
       </div>
+      {learning && <LearnOverlay section="severity" theme={theme} />}
 
       {!hasLive && (
         <div style={{
