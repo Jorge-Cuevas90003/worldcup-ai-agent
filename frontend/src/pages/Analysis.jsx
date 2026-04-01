@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { cardBox, headingStyle, dataFont } from '../utils/styles';
 import LearnOverlay from '../components/LearnOverlay';
+import { buildCorrelationMatrix } from '../services/analytics';
+import { getOddsHistory } from '../services/supabase';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -36,10 +38,65 @@ const trendData = [
 const teamNames = Object.keys(teamStats);
 const lineColors = ['#c9a94e', '#00e676', '#3b82f6', '#ef4444', '#22d3ee', '#a855f7'];
 
+const CORR_TEAMS = ['Spain', 'England', 'France', 'Argentina', 'Brazil', 'Germany', 'Portugal', 'Netherlands'];
+
+function getCorrelationColor(val) {
+  if (val === 1) return 'rgba(100,100,120,0.25)';
+  if (val >= 0.6) return 'rgba(0,230,118,0.55)';
+  if (val >= 0.3) return 'rgba(0,230,118,0.3)';
+  if (val >= 0.1) return 'rgba(0,230,118,0.15)';
+  if (val > -0.1) return 'rgba(148,163,184,0.15)';
+  if (val > -0.3) return 'rgba(239,68,68,0.15)';
+  if (val > -0.6) return 'rgba(239,68,68,0.3)';
+  return 'rgba(239,68,68,0.55)';
+}
+
+function getCorrelationTextColor(val) {
+  if (val === 1) return '#94a3b8';
+  if (val >= 0.3) return '#00e676';
+  if (val > -0.3) return '#94a3b8';
+  return '#ef4444';
+}
+
 export default function Analysis({ theme, bp, learning }) {
   const [teamA, setTeamA] = useState('Spain');
   const [teamB, setTeamB] = useState('England');
+  const [corrMatrix, setCorrMatrix] = useState(null);
+  const [corrTeams, setCorrTeams] = useState([]);
+  const [corrLoading, setCorrLoading] = useState(true);
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchCorrelationData() {
+      setCorrLoading(true);
+      try {
+        const historyMap = {};
+        const results = await Promise.all(
+          CORR_TEAMS.map((team) => getOddsHistory(team, 30))
+        );
+        results.forEach((res, i) => {
+          const teamName = CORR_TEAMS[i];
+          if (res.data && res.data.length >= 3) {
+            historyMap[teamName] = res.data;
+          }
+        });
+        if (cancelled) return;
+        const teams = Object.keys(historyMap);
+        if (teams.length >= 2) {
+          const matrix = buildCorrelationMatrix(historyMap);
+          setCorrMatrix(matrix);
+          setCorrTeams(teams);
+        }
+      } catch (err) {
+        console.error('Correlation fetch error:', err);
+      } finally {
+        if (!cancelled) setCorrLoading(false);
+      }
+    }
+    fetchCorrelationData();
+    return () => { cancelled = true; };
+  }, []);
 
   const radarData = ['ATK', 'DEF', 'MID', 'GK', 'SET', 'PHY'].map((stat) => ({
     stat,
@@ -199,6 +256,117 @@ export default function Analysis({ theme, bp, learning }) {
             ))}
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      {/* Team Correlations — heatmap matrix */}
+      <div style={{ ...gc, marginTop: 12 }}>
+        <h3 style={sectionTitle}>Team Correlations</h3>
+        <p style={{
+          fontSize: 10, color: theme.textDim, margin: '0 0 14px',
+          fontFamily: theme.fontBody, lineHeight: 1.5,
+        }}>
+          Pearson correlation of odds movements. Green = move together, Red = move inversely.
+        </p>
+
+        {corrLoading ? (
+          <div style={{
+            textAlign: 'center', padding: 32, color: theme.textMuted,
+            fontSize: 11, fontFamily: theme.fontData,
+          }}>
+            Loading correlation data...
+          </div>
+        ) : !corrMatrix || corrTeams.length < 2 ? (
+          <div style={{
+            textAlign: 'center', padding: 32, color: theme.textMuted,
+            fontSize: 11, fontFamily: theme.fontData,
+          }}>
+            Not enough history data to compute correlations.
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{
+              borderCollapse: 'collapse', width: '100%', minWidth: corrTeams.length * 56,
+            }}>
+              <thead>
+                <tr>
+                  <th style={{
+                    padding: '6px 8px', fontSize: 9, color: theme.textMuted,
+                    fontFamily: theme.fontHeading, textTransform: theme.textTransform,
+                    letterSpacing: theme.letterSpacing, textAlign: 'left',
+                    borderBottom: `1px solid ${theme.border}`,
+                  }} />
+                  {corrTeams.map((t) => (
+                    <th key={t} style={{
+                      padding: '6px 4px', fontSize: 9, color: theme.textDim,
+                      fontFamily: theme.fontData, textAlign: 'center',
+                      borderBottom: `1px solid ${theme.border}`,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {t.slice(0, 3).toUpperCase()}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {corrTeams.map((rowTeam) => (
+                  <tr key={rowTeam}>
+                    <td style={{
+                      padding: '6px 8px', fontSize: 10, color: theme.textDim,
+                      fontFamily: theme.fontData, whiteSpace: 'nowrap',
+                      borderBottom: `1px solid ${theme.border}`,
+                    }}>
+                      {rowTeam.slice(0, 3).toUpperCase()}
+                    </td>
+                    {corrTeams.map((colTeam) => {
+                      const val = corrMatrix[rowTeam]?.[colTeam] ?? 0;
+                      const isDiag = rowTeam === colTeam;
+                      return (
+                        <td key={colTeam} style={{
+                          padding: '6px 4px', textAlign: 'center',
+                          fontSize: 10, fontFamily: theme.fontData,
+                          fontWeight: isDiag ? 400 : 600,
+                          color: isDiag ? theme.textMuted : getCorrelationTextColor(val),
+                          background: getCorrelationColor(val),
+                          borderBottom: `1px solid ${theme.border}`,
+                          borderRight: `1px solid ${theme.border}`,
+                          transition: 'background 0.2s',
+                        }}>
+                          {isDiag ? '—' : val.toFixed(2)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Legend */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 16, marginTop: 12, flexWrap: 'wrap',
+            }}>
+              {[
+                { label: 'Strong +', color: 'rgba(0,230,118,0.55)' },
+                { label: 'Weak +', color: 'rgba(0,230,118,0.15)' },
+                { label: 'Neutral', color: 'rgba(148,163,184,0.15)' },
+                { label: 'Weak -', color: 'rgba(239,68,68,0.15)' },
+                { label: 'Strong -', color: 'rgba(239,68,68,0.55)' },
+              ].map((item) => (
+                <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <div style={{
+                    width: 12, height: 12, borderRadius: 3,
+                    background: item.color, border: `1px solid ${theme.border}`,
+                  }} />
+                  <span style={{
+                    fontSize: 9, color: theme.textMuted, fontFamily: theme.fontData,
+                  }}>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

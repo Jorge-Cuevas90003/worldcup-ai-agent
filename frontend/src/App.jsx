@@ -11,7 +11,7 @@ import useTheme from './hooks/useTheme';
 import useMode from './hooks/useMode';
 import useBreakpoint from './hooks/useBreakpoint';
 import { fetchLiveOdds, calculateMomentum } from './services/polymarket';
-import { saveOddsSnapshot, saveAlert } from './services/supabase';
+import { saveOddsSnapshot, saveAlert, getLatestOddsSnapshot } from './services/supabase';
 import { ToastProvider } from './components/Toast';
 import Confetti from './components/Confetti';
 import Onboarding from './components/Onboarding';
@@ -48,6 +48,19 @@ export default function App() {
     if (!result || result.teams.length === 0) {
       setDataSource('fallback');
       return;
+    }
+
+    // On the first fetch, seed previous odds from the last Supabase snapshot
+    // so that we can show a real change instead of "+0.00%"
+    if (Object.keys(prevOddsRef.current).length === 0) {
+      try {
+        const snapshot = await getLatestOddsSnapshot();
+        if (Object.keys(snapshot).length > 0) {
+          prevOddsRef.current = snapshot;
+        }
+      } catch {
+        // ignore – will just show 0 change on first load
+      }
     }
 
     // Calculate changes vs previous fetch

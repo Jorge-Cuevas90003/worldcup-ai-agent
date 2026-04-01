@@ -2,8 +2,21 @@ module.exports = {
   POLYMARKET_BASE: 'https://gamma-api.polymarket.com',
   POLYMARKET_WINNER_SLUG: '2026-fifa-world-cup-winner',
 
+  // Single-interval threshold: minimum % change to consider a surge/drop
   ALERT_THRESHOLD: 1.0,
   ALERT_SEVERITY_MULTIPLIER: 20,
+
+  // Velocity detection: sustained movement over VELOCITY_WINDOW snapshots
+  VELOCITY_WINDOW: 4,            // look back N snapshots
+  VELOCITY_THRESHOLD: 1.5,       // cumulative % change across window to trigger
+  VELOCITY_SEVERITY_WEIGHT: 15,  // severity points per 1% velocity
+
+  // Volume anomaly: trigger when volume is N standard deviations above team average
+  VOLUME_ANOMALY_STDDEV: 2.0,
+  VOLUME_SEVERITY_WEIGHT: 10,    // extra severity points for volume anomaly
+
+  // How many recent snapshots to fetch for velocity/volume analysis
+  HISTORY_LOOKBACK: 6,
 
   TEAM_FLAGS: {
     'Spain': '🇪🇸', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'France': '🇫🇷', 'Argentina': '🇦🇷',

@@ -10,7 +10,8 @@
     "install:all": "npm install && cd frontend && npm install"
   },
   "dependencies": {
-    "firebase-admin": "^12.0.0"
+    "firebase-admin": "^12.0.0",
+    "@supabase/supabase-js": "^2.49.0"
   },
   "keywords": ["worldcup", "polymarket", "auth0", "vercel", "agent"],
   "license": "MIT"

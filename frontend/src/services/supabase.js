@@ -27,6 +27,42 @@ export async function getOddsHistory(team, days = 30) {
     .order('recorded_at', { ascending: true });
 }
 
+// Fetch the most recent odds snapshot per team (for change calculation)
+export async function getLatestOddsSnapshot() {
+  // Get the most recent recorded_at timestamp (the last full snapshot)
+  const { data: latest, error: err1 } = await supabase
+    .from('odds_history')
+    .select('recorded_at')
+    .order('recorded_at', { ascending: false })
+    .limit(1);
+
+  if (err1 || !latest || latest.length === 0) return {};
+
+  const latestTs = latest[0].recorded_at;
+
+  // Get all rows from that snapshot (same recorded_at, or within 5 seconds)
+  // Use a small window because rows from a single saveOddsSnapshot batch
+  // may have slightly different timestamps
+  const windowStart = new Date(new Date(latestTs).getTime() - 5000).toISOString();
+  const { data, error } = await supabase
+    .from('odds_history')
+    .select('team, odds, recorded_at')
+    .gte('recorded_at', windowStart)
+    .lte('recorded_at', latestTs)
+    .order('recorded_at', { ascending: false });
+
+  if (error || !data) return {};
+
+  // Keep only the latest odds per team
+  const map = {};
+  for (const row of data) {
+    if (!map[row.team]) {
+      map[row.team] = row.odds;
+    }
+  }
+  return map;
+}
+
 // ── Alerts ──
 export async function saveAlert(alert) {
   return supabase.from('alerts').insert(alert);
