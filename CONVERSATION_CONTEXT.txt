@@ -1,7 +1,7 @@
 ================================================================================
-WORLDCUP AGENT — FULL DEVELOPMENT CONTEXT
-Generated: March 31, 2026
+WORLDCUP AGENT — FULL DEVELOPMENT CONTEXT (Updated March 31, 2026)
 Use this file to continue development on another PC with Claude Code.
+Paste this to Claude Code and say "continue from this context"
 ================================================================================
 
 ## PROJECT SUMMARY
@@ -12,106 +12,117 @@ Auth0 Token Vault for secure OAuth token management.
 ## URLS
 - Live app: https://worldcup-agent.vercel.app
 - GitHub repo: https://github.com/Jorge-Cuevas90003/worldcup-agent
-- Supabase dashboard: https://supabase.com/dashboard (project: worldcup-agent)
-- Auth0 dashboard: https://manage.auth0.com (tenant: dev-nq374ll31kn8pv20)
-- Vercel dashboard: https://vercel.com (project: worldcup-agent)
+- Supabase: https://supabase.com/dashboard (project: worldcup-agent)
+- Auth0: https://manage.auth0.com (tenant: dev-nq374ll31kn8pv20)
+- Vercel: https://vercel.com (project: worldcup-agent)
 
 ## HACKATHON DEADLINES
 - Auth0 "Authorized to Act": April 7, 2026 — https://authorizedtoact.devpost.com/
 - ZerveHack: April 29, 2026 — https://zervehack.devpost.com/
+- REGISTERED on both Devpost
 
-## WHAT'S LEFT FOR AUTH0 SUBMISSION
-1. Demo video (3 min) — show the Auth0 Token Vault flow prominently
-2. Blog post (250+ words) — about Token Vault usage
+## WHAT'S LEFT FOR SUBMISSION
+1. Demo video (3 min) — show Auth0 Token Vault flow prominently
+2. Blog post (250+ words) — about Token Vault usage (bonus prize)
 3. Submit on Devpost with repo URL + live URL + video
 
-## CREDENTIALS (non-secret, public keys only)
+## CREDENTIALS
 
 ### Auth0
 - Domain: dev-nq374ll31kn8pv20.us.auth0.com
 - Client ID: 0azPKvPMEjlPpdBX1FBCzacX0Hj4PzyU
-- App type: Single Page Application
+- Client Secret: in Vercel env vars (nhpvtghpRUoICRCVMpyC0ZbMaBWkky1AEl8H5KRWiimQt_rXqqd4FPbkog8KAgDV)
 - Connections: google-oauth2 (gmail.send, calendar.events), slack-oauth-2 (chat:write)
 - Token Vault: Enabled for Connected Accounts
+- Callback URLs: worldcup-agent.vercel.app/callback, localhost:5173/callback
 
 ### Supabase
-- Project URL: https://sqyjbpaxnxoqffycsmnf.supabase.co
+- URL: https://sqyjbpaxnxoqffycsmnf.supabase.co
 - Anon key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxeWpicGF4bnhvcWZmeWNzbW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NDc4MjEsImV4cCI6MjA5MDIyMzgyMX0.oR5ur0BPPD92RbyoPr2l6JAkcEPhIAmFIVitw4MxW6Y
 - Tables: odds_history, alerts, watchlists, alert_rules, user_preferences
+- RLS enabled on all tables
 
-### Firebase (legacy, mostly replaced by Supabase)
-- Project ID: worldcup-agent
-- API Key: AIzaSyDNcH-NXkGY1OTvPulj47Ip27nn94jX-1Y (public, frontend-only)
+### Slack App
+- App ID: A0AP9FNUH38
+- Client ID: 10806475569361.10791532969110
+
+### Vercel env vars set:
+AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_AUDIENCE, CRON_SECRET, APP_URL, FIREBASE_PROJECT_ID
 
 ### Polymarket
 - API: https://gamma-api.polymarket.com
 - Event slug: 2026-fifa-world-cup-winner-595
 - Rate limit: 24,000 req/min (we poll every 15s)
 
-### Slack App
-- App ID: A0AP9FNUH38
-- Client ID: 10806475569361.10791532969110
-- Workspace: WorldCup Agent
+## COMPLETE FEATURE LIST (all implemented and deployed)
 
-### Vercel
-- Environment variables set: AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_AUDIENCE, CRON_SECRET, APP_URL, FIREBASE_PROJECT_ID
-
-## TECH STACK (all free tier)
-- Frontend: React 18 + Vite
-- Hosting: Vercel (free)
-- Database: Supabase PostgreSQL (free tier)
-- Auth: Auth0 Token Vault (free tier)
-- Data: Polymarket Gamma API (free, public)
-- Charts: Recharts (MIT)
-- Icons: Lucide React (ISC)
-- Flags: flagcdn.com SVGs (free)
-
-## FEATURES BUILT
-
-### Core
-- Live odds from Polymarket (23+ teams, polling every 15s)
-- Auth0 Token Vault OAuth flow (Gmail, Calendar, Slack)
-- Supabase DB (odds snapshots, alerts, watchlists)
+### Core Data
+- Live odds from Polymarket (23+ teams, polling every 15 seconds)
+- Supabase DB persisting odds snapshots, alerts, watchlists
 - Vercel serverless API routes (getOdds, connectService, authCallback, cron)
+- Daily cron job for alert detection (9am UTC)
 
-### UI/UX
-- 3 modes: Lite (casual fans), Pro (traders), Learning (educational)
-- 11 themes with Style DNA system (each visually distinct — different borders, shadows, fonts, animations)
-- 7-step onboarding tour (step 3 highlights Auth0 Token Vault)
-- 32 educational tooltips in Learning mode
-- Real SVG country flags (80+ countries via flagcdn.com)
-- Animated numbers (count-up on change)
-- Confetti particles on surges
-- Card hover micro-interactions
-- Loading skeletons
-- Toast notifications
-- Favicon SVG
-- PWA manifest + service worker
-
-### Analytics Engine
-- ELO-style power ratings (0-100)
-- Smart money detection (institutional vs retail)
-- Edge calculator (Polymarket odds vs historical WC win rates)
-- Trend strength (ADX-inspired, 0-100)
-- Market efficiency scoring
-- Weighted velocity (change per hour)
-- Volatility index (log-return standard deviation)
-- Correlation analysis (Pearson coefficient)
-- Composite sentiment (5-factor weighted)
-
-### Security (for hackathon scoring)
+### Auth0 Token Vault (hackathon core feature)
+- Full OAuth flow: Connect Gmail/Calendar/Slack via Auth0
+- TokenVault class (api/_lib/auth0.js) — Management API integration
+- Gmail alert sending via stored tokens
+- Slack alert posting via stored tokens
+- Step-Up Authentication modal for high-risk actions
+- "Send Test Alert" button demonstrating Token Vault flow
 - Permission Dashboard (CAN/CANNOT per service with OAuth scopes)
 - Security Log timeline (token lifecycle audit trail)
 - Token Vault Architecture pipeline diagram
-- Principle of Least Privilege badge
+- Data Sovereignty badge (privacy guarantees)
+- Agent Activity live indicator (MONITORING status)
+- Disconnect buttons for each service
+
+### UI/UX
+- 3 modes: Lite (casual fans), Pro (traders), Learning (educational)
+- 11 themes with Style DNA system (each visually distinct)
+- Theme DNA: borderRadius, borderStyle, cardStyle, shadowStyle, fontHeading/Body/Data, animSpeed/Style, texture
+- Style resolver (utils/styles.js): cardStyle(), headingStyle(), dataFont(), animEntry(), etc.
+- 7-step onboarding tour (step 3 highlights Auth0 Token Vault with purple glow)
+- 32 educational tooltips in Learning mode
+- Real SVG country flags (80+ countries via flagcdn.com)
+- FlagIcon component maps team names to ISO codes
+- Animated numbers (count-up on change)
+- Confetti particles on surges (>=0.3% change)
+- Card hover micro-interactions (translateY + shadow)
+- Loading skeletons with shimmer
+- Toast notifications
+- Favicon SVG (trophy icon)
+- PWA manifest + service worker (installable)
+- OG meta tags + Twitter cards
+- Responsive: 5 breakpoints (xxs/xs/sm/md/lg)
+
+### Analytics Engine (frontend/src/services/analytics.js)
+- ELO-style power ratings (0-100) combining odds + momentum + volume
+- Smart money detection (SMART MONEY IN, DISTRIBUTION, RETAIL FOMO, ACCUMULATION, QUIET)
+- Edge calculator (Polymarket odds vs historical WC win rates — OVERVALUED/UNDERVALUED)
+- Trend strength (ADX-inspired, 0-100)
+- Market efficiency scoring (0-100 inefficiency)
+- Weighted velocity (change per hour, linearly-weighted moving average)
+- Volatility index (log-return standard deviation, 0-100)
+- Correlation analysis (Pearson coefficient)
+- Composite sentiment (5-factor: direction, velocity, volume, trend, smart money)
 
 ### Pages
-1. Dashboard (Lite: hero + team list + portfolio sim | Pro: stat cards + bento charts + table)
-2. Alerts (surge/drop detection with severity scores)
-3. Matches (6 demo matches with probability bars)
-4. Analysis (radar chart + H2H + trend lines)
-5. Connections/Vault (Auth0 Token Vault + permissions + security log)
-6. Callback (OAuth callback handler)
+1. Dashboard — Lite: hero + team list + portfolio sim | Pro: stat cards + Market Intelligence + bento charts + table
+2. Alerts — surge/drop detection, severity scores, live + demo mixed
+3. Matches — 6 demo matches with probability bars and real flags
+4. Analysis — radar chart + H2H + trend lines (demo team stats)
+5. Connections/Vault — Auth0 Token Vault + permissions + security log + step-up auth + agent activity + data sovereignty
+6. Callback — OAuth callback handler with toast
+
+## TECH STACK (all free tier, $0 total)
+- Frontend: React 18 + Vite
+- Hosting: Vercel
+- Database: Supabase PostgreSQL
+- Auth: Auth0 Token Vault
+- Data: Polymarket Gamma API
+- Charts: Recharts (MIT)
+- Icons: Lucide React (ISC)
+- Flags: flagcdn.com SVGs
 
 ## PROJECT STRUCTURE
 worldcup-agent/
@@ -123,38 +134,49 @@ worldcup-agent/
     connectService.js     — Auth0 authorization URL
     authCallback.js       — OAuth callback
     getOdds.js            — Current odds endpoint
+    proxy.js              — CORS proxy for Polymarket
     cron/checkOdds.js     — Daily cron job
-  frontend/               — React SPA
-    src/components/        — 15+ components
-    src/pages/             — 6 pages
-    src/config/themes.js   — 11 themes with DNA
-    src/utils/styles.js    — Theme-aware style resolver
-    src/services/          — Polymarket, Supabase, Auth0, Analytics
-    src/hooks/             — useTheme, useMode, useBreakpoint
-  supabase/schema.sql     — DB schema (5 tables + RLS)
-  vercel.json             — Deploy config + cron
-  CLAUDE_CONTEXT.md       — Development context
+  frontend/
+    src/components/       — 17+ components (Layout, TeamRow, AlertCard, MatchCard, ConnectionCard, StatCard, ThemePicker, ModeSwitcher, Ticker, AnimatedNumber, Confetti, FlagIcon, LearnOverlay, Onboarding, Skeleton, Toast, WatchlistPanel, AlertRulesPanel, StepUpAuth)
+    src/pages/            — 6 pages
+    src/config/themes.js  — 11 themes with DNA properties
+    src/utils/styles.js   — Theme-aware style resolver (8 functions)
+    src/services/         — polymarket.js, supabase.js, auth.js, api.js, analytics.js
+    src/hooks/            — useTheme, useMode (lite/pro/learning), useBreakpoint
+  supabase/schema.sql     — 5 tables + RLS policies
+  vercel.json             — Deploy config + daily cron
 
 ## LOCAL DEVELOPMENT
 git clone https://github.com/Jorge-Cuevas90003/worldcup-agent.git
 cd worldcup-agent
 npm install && cd frontend && npm install && cd ..
 cd frontend && npm run dev     # localhost:5173
-# For full stack with API: vercel dev
-# Deploy: vercel --prod
+vercel --prod                  # deploy to production
 
-## KNOWN ISSUES / NOTES
-- Firebase API key shows as "secret detected" on GitHub — it's a public frontend key, not a security risk
-- Matches page uses 6 hardcoded demo matches (not connected to real data yet)
-- Analysis page uses hardcoded team stats (ATK/DEF/MID etc.)
-- Alert rules component (AlertRulesPanel) is created but not wired into UI yet
-- Chart shows demo history until 3+ days of Supabase snapshots accumulate
-- Cron job runs daily at 9am UTC (free Vercel tier limit)
+## KNOWN ISSUES
+- Matches page uses 6 hardcoded demo fixtures (not real 2026 schedule)
+- Analysis page team stats (ATK/DEF/MID) are hardcoded demo data
+- Chart uses demo history fallback if Supabase has < 3 days of data
+- Alert rules component (AlertRulesPanel) created but not wired into Vault page
+- Hardcoded user ID for watchlists (no real user auth yet)
+- Firebase API key in source shows as GitHub security alert (it's a public frontend key, not a risk)
 
-## DESIGN DECISIONS
-- Theme DNA system: each theme has borderRadius, borderStyle, cardStyle, shadowStyle, fontHeading/Body/Data, animSpeed/Style, texture
-- Style resolver (utils/styles.js): components call cardStyle(theme), headingStyle(theme) etc. instead of hardcoding glass/blur patterns
-- FlagIcon component: maps team names to ISO codes, renders SVGs from flagcdn.com
-- Learning mode: independent toggle (not tied to Lite/Pro), adds inline educational badges
-- Alerts: live alerts shown first, demo alerts fill remaining spots (always 5+ visible)
-- Polling: 15s interval, 0.05% threshold for alert generation, 0.3% for confetti
+## AUDIT STATUS (last audit: March 31, 2026)
+- All 4 critical bugs fixed (edge calc, analytics history, disconnect, cron)
+- Zero console errors
+- All 23 team flags rendering as SVGs
+- All 5 pages return HTTP 200
+- Polymarket live data verified (3-way match: API, Vercel, Supabase)
+- Auth0 connect URL generation verified
+- Step-Up Auth modal verified working
+- Supabase snapshots actively recording
+
+## HACKATHON SCORING ESTIMATE (after all fixes)
+- Auth0 "Authorized to Act": ~80-85/100
+  - Security Model: Step-Up Auth + Permission Dashboard + Security Log + Principle of Least Privilege
+  - User Control: 3 modes, disconnect, Learning tooltips, Data Sovereignty
+  - Technical Execution: Token Vault class, OAuth flow, cron, Supabase
+  - Design: 11 themes with DNA, onboarding, responsive, PWA
+  - Potential Impact: Real Polymarket data, actionable Edge/ELO analytics
+
+- ZerveHack: ~75-78/100 (needs Zerve platform integration)
