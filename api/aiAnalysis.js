@@ -14,7 +14,7 @@ module.exports = async function handler(req, res) {
 
     const AI_API_KEY = process.env.AI_API_KEY;
     const AI_API_URL = process.env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
-    const AI_MODEL = process.env.AI_MODEL || 'llama-3.1-70b-versatile';
+    const AI_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
 
     if (!AI_API_KEY) {
       // Fallback: generate structured analysis without LLM

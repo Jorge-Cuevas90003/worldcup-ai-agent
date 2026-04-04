@@ -159,7 +159,7 @@ function computeSeverity({ absChange, velocityInfo, volumeAnomaly }) {
  */
 async function generateAIAlertSummary(alerts, teams) {
   const AI_API_URL = process.env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
-  const AI_MODEL = process.env.AI_MODEL || 'llama-3.1-70b-versatile';
+  const AI_MODEL = process.env.AI_MODEL || 'llama-3.3-70b-versatile';
 
   const alertLines = alerts.map((a) =>
     `${a.team}: ${a.change > 0 ? '+' : ''}${a.change.toFixed(1)}% (severity ${a.severity}/100) - ${a.message}`
