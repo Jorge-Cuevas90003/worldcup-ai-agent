@@ -13,8 +13,8 @@ module.exports = async function handler(req, res) {
     const topTeams = odds.sort((a, b) => b.odds - a.odds).slice(0, 10);
 
     const AI_API_KEY = process.env.AI_API_KEY;
-    const AI_API_URL = process.env.AI_API_URL || 'https://api.anthropic.com/v1/messages';
-    const AI_MODEL = process.env.AI_MODEL || 'claude-sonnet-4-20250514';
+    const AI_API_URL = process.env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
+    const AI_MODEL = process.env.AI_MODEL || 'llama-3.1-70b-versatile';
 
     if (!AI_API_KEY) {
       // Fallback: generate structured analysis without LLM
@@ -40,25 +40,24 @@ Respond ONLY with valid JSON, no markdown fences.`;
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': AI_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${AI_API_KEY}`,
       },
       body: JSON.stringify({
         model: AI_MODEL,
         max_tokens: 1024,
         messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
       console.error('AI API error:', response.status, await response.text());
-      // Fall back to rule-based on API error
       const analysis = generateRuleBasedAnalysis(topTeams);
       return res.status(200).json({ source: 'rule-based-fallback', analysis, odds: topTeams, timestamp: new Date().toISOString() });
     }
 
     const data = await response.json();
-    const aiText = data.content?.[0]?.text || '';
+    const aiText = data.choices?.[0]?.message?.content || '';
 
     // Try to parse JSON from response
     let analysis;

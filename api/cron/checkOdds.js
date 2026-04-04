@@ -158,8 +158,8 @@ function computeSeverity({ absChange, velocityInfo, volumeAnomaly }) {
  * Only invoked when AI_API_KEY is set — non-breaking.
  */
 async function generateAIAlertSummary(alerts, teams) {
-  const AI_API_URL = process.env.AI_API_URL || 'https://api.anthropic.com/v1/messages';
-  const AI_MODEL = process.env.AI_MODEL || 'claude-sonnet-4-20250514';
+  const AI_API_URL = process.env.AI_API_URL || 'https://api.groq.com/openai/v1/chat/completions';
+  const AI_MODEL = process.env.AI_MODEL || 'llama-3.1-70b-versatile';
 
   const alertLines = alerts.map((a) =>
     `${a.team}: ${a.change > 0 ? '+' : ''}${a.change.toFixed(1)}% (severity ${a.severity}/100) - ${a.message}`
@@ -183,20 +183,20 @@ Respond with ONLY the summary text, no JSON or formatting.`;
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': process.env.AI_API_KEY,
-      'anthropic-version': '2023-06-01',
+      'Authorization': `Bearer ${process.env.AI_API_KEY}`,
     },
     body: JSON.stringify({
       model: AI_MODEL,
       max_tokens: 256,
       messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
     }),
   });
 
   if (!response.ok) return null;
 
   const data = await response.json();
-  return data.content?.[0]?.text || null;
+  return data.choices?.[0]?.message?.content || null;
 }
 
 // ── Main Handler ────────────────────────────────────────
