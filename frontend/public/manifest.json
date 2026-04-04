@@ -1,0 +1,14 @@
+{
+  "name": "WorldCup Agent",
+  "short_name": "WC Agent",
+  "description": "Live FIFA World Cup 2026 odds from Polymarket with AI-powered alerts via Auth0 Token Vault",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e18",
+  "theme_color": "#c9a94e",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "categories": ["sports", "finance"]
+}
