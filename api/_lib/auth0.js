@@ -11,18 +11,26 @@ class TokenVault {
       return this._managementToken;
     }
 
+    // Use M2M app credentials for Management API access
+    const clientId = process.env.AUTH0_M2M_CLIENT_ID || AUTH0.CLIENT_ID;
+    const clientSecret = process.env.AUTH0_M2M_CLIENT_SECRET || AUTH0.CLIENT_SECRET;
+
     const res = await fetch(`https://${AUTH0.DOMAIN}/oauth/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         grant_type: 'client_credentials',
-        client_id: AUTH0.CLIENT_ID,
-        client_secret: AUTH0.CLIENT_SECRET,
+        client_id: clientId,
+        client_secret: clientSecret,
         audience: AUTH0.AUDIENCE,
       }),
     });
 
     const data = await res.json();
+    if (!data.access_token) {
+      console.error('Failed to get management token:', data);
+      throw new Error('Failed to get Auth0 management token');
+    }
     this._managementToken = data.access_token;
     this._tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
     return this._managementToken;
@@ -31,13 +39,26 @@ class TokenVault {
   async getUserToken(userId, connection) {
     const mgmtToken = await this.getManagementToken();
 
+    // Get user profile which includes identity provider tokens
     const res = await fetch(
-      `https://${AUTH0.DOMAIN}/api/v2/users/${encodeURIComponent(userId)}/federated-tokens/${connection}`,
+      `https://${AUTH0.DOMAIN}/api/v2/users/${encodeURIComponent(userId)}`,
       { headers: { Authorization: `Bearer ${mgmtToken}` } }
     );
 
     const data = await res.json();
-    return data.access_token;
+    if (data.statusCode) {
+      console.error('Failed to get user:', data);
+      return null;
+    }
+
+    // Find the matching identity and return its access_token
+    const identity = (data.identities || []).find(i => i.provider === connection);
+    if (!identity || !identity.access_token) {
+      console.error(`No token found for connection ${connection}`);
+      return null;
+    }
+
+    return identity.access_token;
   }
 
   async getGoogleToken(userId) {
