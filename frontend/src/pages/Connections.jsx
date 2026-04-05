@@ -28,10 +28,23 @@ export default function Connections({ isPro, theme, bp, learning }) {
     });
   };
 
-  const handleTestAlert = () => {
-    requireAuth('Send test alert email via Gmail API', () => {
-      addToast?.({ type: 'success', title: 'Test Alert Sent', message: 'Test alert sent via Auth0 Token Vault \u2192 Gmail API', duration: 4000 });
-    });
+  const handleTestAlert = async (service) => {
+    try {
+      addToast?.({ type: 'info', title: 'Sending...', message: `Testing ${service} via Token Vault...`, duration: 2000 });
+      const res = await fetch('/api/testAlert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ service, userId: 'demo-user' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addToast?.({ type: 'success', title: 'Test Successful!', message: data.message, duration: 5000 });
+      } else {
+        addToast?.({ type: 'error', title: 'Test Failed', message: data.error || 'Unknown error', duration: 5000 });
+      }
+    } catch (err) {
+      addToast?.({ type: 'error', title: 'Test Failed', message: err.message, duration: 5000 });
+    }
   };
 
   const handleConnect = async (service) => {
@@ -286,32 +299,28 @@ export default function Connections({ isPro, theme, bp, learning }) {
                 >
                   Disconnect {s}
                 </button>
-                {s === 'gmail' && (
-                  <>
-                    <span style={{ color: theme.textMuted, fontSize: 10 }}>|</span>
-                    <button
-                      onClick={handleTestAlert}
-                      style={{
-                        background: 'none',
-                        border: `1px solid ${theme.accent}33`,
-                        borderRadius: Math.min(theme.borderRadius, 8),
-                        cursor: 'pointer',
-                        fontSize: 10,
-                        color: theme.accent,
-                        fontFamily: theme.fontData,
-                        fontWeight: 600,
-                        padding: '3px 10px',
-                        opacity: 0.85,
-                        transition: 'all 0.2s',
-                        display: 'flex', alignItems: 'center', gap: 5,
-                      }}
-                      onMouseEnter={(e) => { e.target.style.opacity = 1; e.target.style.background = `${theme.accent}11`; }}
-                      onMouseLeave={(e) => { e.target.style.opacity = 0.85; e.target.style.background = 'none'; }}
-                    >
-                      <Send size={10} /> Send Test Alert
-                    </button>
-                  </>
-                )}
+                <span style={{ color: theme.textMuted, fontSize: 10 }}>|</span>
+                <button
+                  onClick={() => handleTestAlert(s)}
+                  style={{
+                    background: 'none',
+                    border: `1px solid ${theme.accent}33`,
+                    borderRadius: Math.min(theme.borderRadius, 8),
+                    cursor: 'pointer',
+                    fontSize: 10,
+                    color: theme.accent,
+                    fontFamily: theme.fontData,
+                    fontWeight: 600,
+                    padding: '3px 10px',
+                    opacity: 0.85,
+                    transition: 'all 0.2s',
+                    display: 'flex', alignItems: 'center', gap: 5,
+                  }}
+                  onMouseEnter={(e) => { e.target.style.opacity = 1; e.target.style.background = `${theme.accent}11`; }}
+                  onMouseLeave={(e) => { e.target.style.opacity = 0.85; e.target.style.background = 'none'; }}
+                >
+                  <Send size={10} /> {s === 'gmail' ? 'Send Test Email' : s === 'calendar' ? 'Create Test Event' : 'Send Test Message'}
+                </button>
               </div>
             )}
           </div>
