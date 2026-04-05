@@ -29,15 +29,15 @@ module.exports = async function handler(req, res) {
       const userEmail = profile.email;
 
       // Build email
-      const subject = '⚽ WorldCup AI Agent - Test Alert';
-      const body = 'This is a test alert from WorldCup AI Agent.\n\nYour Gmail connection via Auth0 Token Vault is working correctly!\n\n🏆 Spain: 15.8%\n🇫🇷 France: 13.6%\n🏴 England: 11.4%\n\nYou will receive alerts when significant odds movements are detected.';
+      const subject = 'WorldCup AI Agent - Test Alert';
+      const body = 'This is a test alert from WorldCup AI Agent.\n\nYour Gmail connection via Auth0 Token Vault is working correctly!\n\nCurrent favorites:\n- Spain: 15.8%\n- France: 13.6%\n- England: 11.4%\n\nYou will receive alerts when significant odds movements are detected.';
 
-      const raw = btoa(
+      const raw = Buffer.from(
         `To: ${userEmail}\r\n` +
         `Subject: ${subject}\r\n` +
         `Content-Type: text/plain; charset=utf-8\r\n\r\n` +
         body
-      ).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      ).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
       const sendRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
         method: 'POST',
