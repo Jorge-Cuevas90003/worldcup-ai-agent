@@ -66,7 +66,22 @@ class TokenVault {
   }
 
   async getSlackToken(userId) {
-    return this.getUserToken(userId, 'slack-oauth-2');
+    // Try the main user first
+    const token = await this.getUserToken(userId, 'slack-oauth-2');
+    if (token) return token;
+
+    // If not found, search for a Slack-linked user by email
+    const mgmtToken = await this.getManagementToken();
+    const res = await fetch(
+      `https://${AUTH0.DOMAIN}/api/v2/users?q=identities.connection:"slack-oauth-2"&search_engine=v3`,
+      { headers: { Authorization: `Bearer ${mgmtToken}` } }
+    );
+    const users = await res.json();
+    if (Array.isArray(users) && users.length > 0) {
+      const slackIdentity = users[0].identities?.find(i => i.connection === 'slack-oauth-2');
+      if (slackIdentity?.access_token) return slackIdentity.access_token;
+    }
+    return null;
   }
 
   getAuthorizationUrl(connection, redirectUri, state) {
