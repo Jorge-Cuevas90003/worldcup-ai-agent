@@ -7,10 +7,11 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const { service, userId } = req.body;
+    const { service } = req.body;
+    const userId = process.env.DEMO_USER_ID;
 
     if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
+      return res.status(400).json({ error: 'DEMO_USER_ID not configured in environment' });
     }
 
     if (service === 'gmail') {
