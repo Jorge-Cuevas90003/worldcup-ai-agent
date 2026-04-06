@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Trophy, Radio, Shield, Lock, Bell, Eye, Sparkles,
   Palette, ChevronRight, ChevronLeft, X, Link2, Mail,
-  MessageSquare, Zap,
+  Zap,
 } from 'lucide-react';
 import FlagIcon from './FlagIcon';
 
@@ -23,7 +23,7 @@ const STEP_COLORS = [
 const VAULT_PIPELINE = [
   { label: 'App', icon: Zap },
   { label: 'Auth0', icon: Shield },
-  { label: 'Google / Slack', icon: Link2 },
+  { label: 'Google OAuth', icon: Link2 },
   { label: 'Token Vault', icon: Lock },
   { label: 'Auto Refresh', icon: Radio },
   { label: 'API Call', icon: Mail },
@@ -46,13 +46,13 @@ const STEPS = [
   {
     icon: Shield,
     title: 'Auth0 Token Vault',
-    body: 'Your tokens are stored securely in Auth0 Token Vault. When odds shift, we use YOUR Gmail/Slack tokens to send alerts \u2014 auto-refreshed, never exposed.',
+    body: 'Your tokens are stored securely in Auth0 Token Vault. When odds shift, we use YOUR Gmail & Calendar tokens to send alerts \u2014 auto-refreshed, never exposed.',
     vault: true,
   },
   {
     icon: Bell,
     title: 'Smart Alerts',
-    body: 'Get notified when odds surge or drop. Email via Gmail API, messages via Slack API \u2014 all authenticated through Auth0 Token Vault.',
+    body: 'Get notified when odds surge or drop. Email via Gmail API, events via Calendar API \u2014 all authenticated through Auth0 Token Vault.',
   },
   {
     icon: Eye,
@@ -68,7 +68,7 @@ const STEPS = [
   {
     icon: ChevronRight,
     title: 'Get Started',
-    body: 'Star your favorite teams, connect Gmail & Slack, and let the agent work for you.',
+    body: 'Star your favorite teams, connect Gmail & Calendar, and let the agent work for you.',
     cta: true,
   },
 ];

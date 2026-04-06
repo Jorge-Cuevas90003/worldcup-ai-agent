@@ -1,10 +1,9 @@
-import { Mail, CalendarDays, MessageSquare, Check, Link2, Lock, Shield } from 'lucide-react';
+import { Mail, CalendarDays, Check, Link2, Lock, Shield } from 'lucide-react';
 import { cardStyle, headingStyle, dataFont, animEntry } from '../utils/styles';
 
 const serviceConfig = {
   gmail: { icon: Mail, label: 'Gmail', desc: 'Odds alerts via email', color: '#ea4335' },
   calendar: { icon: CalendarDays, label: 'Calendar', desc: 'Sync match schedules', color: '#4285f4' },
-  slack: { icon: MessageSquare, label: 'Slack', desc: 'Channel notifications', color: '#611f69' },
 };
 
 export default function ConnectionCard({ service, connected, onConnect, isPro, theme, index = 0 }) {

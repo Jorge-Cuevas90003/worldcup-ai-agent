@@ -59,9 +59,7 @@ module.exports = {
   CONNECTIONS_MAP: {
     gmail: 'google-oauth2',
     calendar: 'google-oauth2',
-    slack: 'slack-oauth-2',
   },
 
   GOOGLE_SCOPES: 'openid profile email https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar.events',
-  SLACK_SCOPES: 'chat:write channels:read',
 };

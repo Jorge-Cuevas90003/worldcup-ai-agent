@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Lock, Link2, Check, X, Mail, CalendarDays, MessageSquare, Clock, Send, Eye } from 'lucide-react';
+import { Shield, Lock, Link2, Check, X, Mail, CalendarDays, Clock, Send, Eye } from 'lucide-react';
 import ConnectionCard from '../components/ConnectionCard';
 import { connectService } from '../services/api';
 import { cardBox, headingStyle, dataFont, animEntry } from '../utils/styles';
@@ -11,8 +11,8 @@ export default function Connections({ isPro, theme, bp, learning }) {
   const [connections, setConnections] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('wc_connections') || '{}');
-      return { gmail: !!stored.gmail, calendar: !!stored.calendar, slack: !!stored.slack };
-    } catch { return { gmail: false, calendar: false, slack: false }; }
+      return { gmail: !!stored.gmail, calendar: !!stored.calendar };
+    } catch { return { gmail: false, calendar: false }; }
   });
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
   const { requireAuth, StepUpModal } = useStepUp(theme);
@@ -38,7 +38,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
     try {
       // Try API first, fallback to direct Auth0 URL
       const redirectUri = `${window.location.origin}/callback`;
-      const connectionsMap = { gmail: 'google-oauth2', calendar: 'google-oauth2', slack: 'slack-oauth-2' };
+      const connectionsMap = { gmail: 'google-oauth2', calendar: 'google-oauth2' };
       const connection = connectionsMap[service];
       const domain = 'dev-nq374ll31kn8pv20.us.auth0.com';
       const clientId = '0azPKvPMEjlPpdBX1FBCzacX0Hj4PzyU';
@@ -192,11 +192,6 @@ export default function Connections({ isPro, theme, bp, learning }) {
               can: [{ label: 'Create match events', scope: 'calendar.events' }],
               cannot: ['Delete events', 'Read your calendar', 'Modify existing events'],
             },
-            {
-              name: 'Slack', icon: MessageSquare, color: theme.green,
-              can: [{ label: 'Send messages', scope: 'chat:write' }],
-              cannot: ['Read message history', 'Access private channels', 'Manage workspace'],
-            },
           ].map((svc) => {
             const SvcIcon = svc.icon;
             return (
@@ -256,7 +251,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
 
       {/* Service cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: isPro ? 10 : 10 }}>
-        {['gmail', 'calendar', 'slack'].map((s, i) => (
+        {['gmail', 'calendar'].map((s, i) => (
           <div key={s}>
             <ConnectionCard
               service={s}
@@ -333,7 +328,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
           { t: fmt(5),  desc: 'API call: gmail.send',            type: 'success' },
           { t: fmt(6),  desc: 'Alert triggered: Spain +0.1%',    type: 'success' },
           { t: fmt(20), desc: 'Token auto-refresh scheduled',    type: 'token' },
-          { t: fmt(30), desc: 'Slack webhook verified',          type: 'success' },
+          { t: fmt(30), desc: 'Calendar token refreshed',        type: 'token' },
           { t: fmt(40), desc: 'User connected Gmail',            type: 'info' },
           { t: fmt(41), desc: 'OAuth consent granted',           type: 'info' },
           { t: fmt(42), desc: 'Authorization request sent',      type: 'info' },
@@ -427,7 +422,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
               { label: 'Provider Consent', active: true },
               { label: 'Token Vault Store' },
               { label: 'Auto Refresh', active: true },
-              { label: 'Gmail / Slack API' },
+              { label: 'Gmail / Calendar API' },
             ].map((step, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span style={{
