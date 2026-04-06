@@ -105,7 +105,7 @@ module.exports = async function handler(req, res) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          channel: '#general',
+          channel: '#todo-worldcup-agent',
           text: '⚽ *WorldCup AI Agent - Test Alert*\n\nYour Slack connection via Auth0 Token Vault is working!\n\n🏆 Current favorites:\n• 🇪🇸 Spain: 15.8%\n• 🇫🇷 France: 13.6%\n• 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England: 11.4%',
         }),
       });
