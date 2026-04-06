@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Lock, Link2, Check, X, Mail, CalendarDays, MessageSquare, Clock, Send, Eye } from 'lucide-react';
+import { Shield, Lock, Link2, Check, X, Mail, CalendarDays, Clock, Send, Eye } from 'lucide-react';
 import ConnectionCard from '../components/ConnectionCard';
 import { connectService } from '../services/api';
 import { cardBox, headingStyle, dataFont, animEntry } from '../utils/styles';
@@ -11,8 +11,8 @@ export default function Connections({ isPro, theme, bp, learning }) {
   const [connections, setConnections] = useState(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('wc_connections') || '{}');
-      return { gmail: !!stored.gmail, calendar: !!stored.calendar, slack: !!stored.slack };
-    } catch { return { gmail: false, calendar: false, slack: false }; }
+      return { gmail: !!stored.gmail, calendar: !!stored.calendar };
+    } catch { return { gmail: false, calendar: false }; }
   });
   const isMobile = ['xxs', 'xs', 'sm'].includes(bp);
   const { requireAuth, StepUpModal } = useStepUp(theme);
@@ -51,7 +51,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
     try {
       // Try API first, fallback to direct Auth0 URL
       const redirectUri = `${window.location.origin}/callback`;
-      const connectionsMap = { gmail: 'google-oauth2', calendar: 'google-oauth2', slack: 'slack-oauth-2' };
+      const connectionsMap = { gmail: 'google-oauth2', calendar: 'google-oauth2' };
       const connection = connectionsMap[service];
       const domain = import.meta.env.VITE_AUTH0_DOMAIN;
       const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
@@ -206,20 +206,31 @@ export default function Connections({ isPro, theme, bp, learning }) {
               cannot: ['Delete events', 'Read your calendar', 'Modify existing events'],
             },
             {
-              name: 'Slack', icon: MessageSquare, color: theme.green,
-              can: [{ label: 'Send messages', scope: 'chat:write' }],
-              cannot: ['Read message history', 'Access private channels', 'Manage workspace'],
+              name: 'Telegram', icon: Send, color: theme.textMuted, comingSoon: true,
+              can: [{ label: 'Send notifications', scope: 'bot:send' }],
+              cannot: ['Read message history', 'Access group chats', 'Manage channels'],
             },
           ].map((svc) => {
             const SvcIcon = svc.icon;
             return (
               <div key={svc.name} style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <SvcIcon size={14} color={theme.green} />
+                  <SvcIcon size={14} color={svc.comingSoon ? theme.textMuted : theme.green} />
                   <span style={{
-                    fontSize: 12, fontWeight: 600, color: theme.text,
+                    fontSize: 12, fontWeight: 600, color: svc.comingSoon ? theme.textMuted : theme.text,
                     fontFamily: theme.fontHeading,
                   }}>{svc.name}</span>
+                  {svc.comingSoon && (
+                    <span style={{
+                      fontSize: 9, fontWeight: 700, color: theme.textMuted,
+                      background: `${theme.textMuted}18`,
+                      border: `1px solid ${theme.textMuted}33`,
+                      borderRadius: Math.min(theme.borderRadius, 6),
+                      padding: '2px 7px',
+                      fontFamily: theme.fontData,
+                      letterSpacing: '0.08em',
+                    }}>COMING SOON</span>
+                  )}
                 </div>
                 <div style={{ paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {svc.can.map((c) => (
@@ -269,7 +280,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
 
       {/* Service cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: isPro ? 10 : 10 }}>
-        {['gmail', 'calendar', 'slack'].map((s, i) => (
+        {['gmail', 'calendar', 'telegram'].map((s, i) => (
           <div key={s}>
             <ConnectionCard
               service={s}
@@ -278,6 +289,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
               isPro={isPro}
               theme={theme}
               index={i}
+              comingSoon={s === 'telegram'}
             />
             {connections[s] && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 12px', marginTop: 2 }}>
@@ -319,7 +331,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
                   onMouseEnter={(e) => { e.target.style.opacity = 1; e.target.style.background = `${theme.accent}11`; }}
                   onMouseLeave={(e) => { e.target.style.opacity = 0.85; e.target.style.background = 'none'; }}
                 >
-                  <Send size={10} /> {s === 'gmail' ? 'Send Test Email' : s === 'calendar' ? 'Create Test Event' : 'Send Test Message'}
+                  <Send size={10} /> {s === 'gmail' ? 'Send Test Email' : s === 'calendar' ? 'Create Test Event' : 'Send Test Notification'}
                 </button>
               </div>
             )}
@@ -342,7 +354,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
           { t: fmt(5),  desc: 'API call: gmail.send',            type: 'success' },
           { t: fmt(6),  desc: 'Alert triggered: Spain +0.1%',    type: 'success' },
           { t: fmt(20), desc: 'Token auto-refresh scheduled',    type: 'token' },
-          { t: fmt(30), desc: 'Slack webhook verified',          type: 'success' },
+          { t: fmt(30), desc: 'Calendar event synced',            type: 'success' },
           { t: fmt(40), desc: 'User connected Gmail',            type: 'info' },
           { t: fmt(41), desc: 'OAuth consent granted',           type: 'info' },
           { t: fmt(42), desc: 'Authorization request sent',      type: 'info' },
@@ -436,7 +448,7 @@ export default function Connections({ isPro, theme, bp, learning }) {
               { label: 'Provider Consent', active: true },
               { label: 'Token Vault Store' },
               { label: 'Auto Refresh', active: true },
-              { label: 'Gmail / Slack API' },
+              { label: 'Gmail / Calendar API' },
             ].map((step, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                 <span style={{

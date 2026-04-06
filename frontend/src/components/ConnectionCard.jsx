@@ -1,13 +1,13 @@
-import { Mail, CalendarDays, MessageSquare, Check, Link2, Lock, Shield } from 'lucide-react';
+import { Mail, CalendarDays, MessageSquare, Send, Check, Link2, Lock, Shield } from 'lucide-react';
 import { cardStyle, headingStyle, dataFont, animEntry } from '../utils/styles';
 
 const serviceConfig = {
   gmail: { icon: Mail, label: 'Gmail', desc: 'Odds alerts via email', color: '#ea4335' },
   calendar: { icon: CalendarDays, label: 'Calendar', desc: 'Sync match schedules', color: '#4285f4' },
-  slack: { icon: MessageSquare, label: 'Slack', desc: 'Channel notifications', color: '#611f69' },
+  telegram: { icon: Send, label: 'Telegram', desc: 'Instant notifications', color: '#229ED9' },
 };
 
-export default function ConnectionCard({ service, connected, onConnect, isPro, theme, index = 0 }) {
+export default function ConnectionCard({ service, connected, onConnect, isPro, theme, index = 0, comingSoon = false }) {
   const cfg = serviceConfig[service] || serviceConfig.gmail;
   const Icon = cfg.icon;
 
@@ -41,21 +41,25 @@ export default function ConnectionCard({ service, connected, onConnect, isPro, t
             <div style={{ fontSize: 12, color: theme.textDim }}>{cfg.desc}</div>
           </div>
           <button
-            onClick={() => !connected && onConnect(service)}
+            onClick={() => !connected && !comingSoon && onConnect(service)}
+            disabled={comingSoon}
             style={{
               padding: '9px 20px', borderRadius: theme.borderRadius,
-              background: connected
-                ? 'transparent'
-                : `linear-gradient(135deg, ${theme.accent}, ${theme.accentAlt})`,
-              color: connected ? theme.green : '#fff',
-              border: connected ? `1px solid ${theme.green}44` : 'none',
-              cursor: connected ? 'default' : 'pointer',
+              background: comingSoon
+                ? `${theme.textMuted}22`
+                : connected
+                  ? 'transparent'
+                  : `linear-gradient(135deg, ${theme.accent}, ${theme.accentAlt})`,
+              color: comingSoon ? theme.textMuted : connected ? theme.green : '#fff',
+              border: comingSoon ? `1px solid ${theme.textMuted}33` : connected ? `1px solid ${theme.green}44` : 'none',
+              cursor: comingSoon ? 'not-allowed' : connected ? 'default' : 'pointer',
               fontSize: 12, fontWeight: 700, fontFamily: theme.fontBody,
               display: 'flex', alignItems: 'center', gap: 6,
               transition: 'all 0.2s',
+              opacity: comingSoon ? 0.6 : 1,
             }}
           >
-            {connected ? <><Check size={14} /> Active</> : <><Link2 size={14} /> Connect</>}
+            {comingSoon ? 'Coming Soon' : connected ? <><Check size={14} /> Active</> : <><Link2 size={14} /> Connect</>}
           </button>
         </div>
       </div>
@@ -127,24 +131,30 @@ export default function ConnectionCard({ service, connected, onConnect, isPro, t
         )}
 
         <button
-          onClick={() => !connected && onConnect(service)}
+          onClick={() => !connected && !comingSoon && onConnect(service)}
+          disabled={comingSoon}
           style={{
             width: '100%', padding: '9px', borderRadius: theme.borderRadius,
-            background: connected
-              ? 'transparent'
-              : `linear-gradient(135deg, ${theme.accent}, ${theme.accentAlt})`,
-            color: connected ? theme.green : '#fff',
-            border: connected ? `1px solid ${theme.border}` : 'none',
-            cursor: connected ? 'default' : 'pointer',
+            background: comingSoon
+              ? `${theme.textMuted}22`
+              : connected
+                ? 'transparent'
+                : `linear-gradient(135deg, ${theme.accent}, ${theme.accentAlt})`,
+            color: comingSoon ? theme.textMuted : connected ? theme.green : '#fff',
+            border: comingSoon ? `1px solid ${theme.textMuted}33` : connected ? `1px solid ${theme.border}` : 'none',
+            cursor: comingSoon ? 'not-allowed' : connected ? 'default' : 'pointer',
             fontSize: 11, fontWeight: 700,
             fontFamily: theme.fontHeading, textTransform: theme.textTransform,
             letterSpacing: theme.letterSpacing,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            opacity: comingSoon ? 0.6 : 1,
           }}
         >
-          {connected
-            ? <><Lock size={12} /> Via Auth0 Token Vault</>
-            : <><Link2 size={12} /> Connect with Auth0</>}
+          {comingSoon
+            ? 'Coming Soon'
+            : connected
+              ? <><Lock size={12} /> Via Auth0 Token Vault</>
+              : <><Link2 size={12} /> Connect with Auth0</>}
         </button>
       </div>
     </div>
