@@ -10,7 +10,7 @@
 
 ## What It Does
 
-An AI agent web app that monitors World Cup 2026 betting odds from Polymarket in real-time and sends alerts when significant shifts occur via Gmail, Slack, and Google Calendar, all authenticated securely through **Auth0 Token Vault**.
+An AI agent web app that monitors World Cup 2026 betting odds from Polymarket in real-time and sends alerts when significant shifts occur via Gmail and Google Calendar, all authenticated securely through **Auth0 Token Vault**.
 
 ## Architecture
 
@@ -31,8 +31,8 @@ An AI agent web app that monitors World Cup 2026 betting odds from Polymarket in
               |           Vault            (DB)
               |              |               |
               |     +--------+--------+      |
-              |     |        |        |      |
-              |   Gmail   Slack   Calendar   |
+              |     |                |      |
+              |   Gmail         Calendar   |
               |   API     API     API        |
               |                              |
               +--------- odds_history -------+
@@ -48,7 +48,7 @@ This is the core hackathon feature. The agent uses Auth0 Token Vault to:
 2. **Consent** - Redirects to Auth0 which redirects to Google OAuth consent
 3. **Store** - Auth0 Token Vault stores the OAuth tokens securely
 4. **Refresh** - Tokens are auto-refreshed by Auth0 (no manual intervention)
-5. **Use** - When odds shift, the agent retrieves the stored token and calls Gmail/Slack API
+5. **Use** - When odds shift, the agent retrieves the stored token and calls Gmail/Calendar API
 
 ```
 App -> Auth0 /authorize -> Google Consent -> Token Vault -> Auto Refresh -> Gmail API
@@ -65,7 +65,7 @@ App -> Auth0 /authorize -> Google Consent -> Token Vault -> Auto Refresh -> Gmai
 | Feature | Description |
 |---------|-------------|
 | Live Odds | 23+ teams from Polymarket, polling every 15 seconds |
-| Smart Alerts | Detects odds surges/drops, sends via Gmail + Slack |
+| Smart Alerts | Detects odds surges/drops, sends via Gmail + Calendar |
 | Auth0 Token Vault | Secure OAuth token storage with auto-refresh |
 | Lite/Pro Modes | Casual fan view vs trader analytics dashboard |
 | 11 Themes | Each with unique typography, borders, shadows, animations |
@@ -100,7 +100,7 @@ worldcup-agent/
 │   ├── _lib/
 │   │   ├── auth0.js        # TokenVault class (Auth0 Management API)
 │   │   ├── config.js       # Configuration + team flags
-│   │   ├── notifications.js # Gmail + Slack alert senders
+│   │   ├── notifications.js # Gmail + Calendar alert senders
 │   │   └── polymarket.js   # Polymarket API client
 │   ├── connectService.js   # Generate Auth0 authorization URL
 │   ├── authCallback.js     # OAuth callback handler
